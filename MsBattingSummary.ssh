@@ -1,0 +1,120 @@
+#!/bin/bash
+# PURPOSE: This script takes a large csv file(Mariners_Batting_Data.csv) and outputs an 
+# easy-to-read summary of the batting data.
+
+# ABOUT THE FILE: Mariners_Batting_Data is a file containing data on the batting of the Mariners
+# Source: https://www.baseball-reference.com/teams/SEA/2019-batting.shtml#team_batting::none
+
+# Outputs a breif intro to the file
+# Using the echo command that outputs the string
+# The second echo is creating a new line
+echo "The Mariners_Batting_Data.csv file contains batting data on the Seattle Mariners.
+For the CSV of this data go to: 
+https://www.baseball-reference.com/teams/SEA/2019-batting.shtml#team_batting::none"
+echo
+
+# Calculates and outputs the number of lines in the file.
+# This corresponds to the number of players in the file.
+# The "numLines=" is creating a variable called numLines
+# the cat command reads the csv file
+# the wc command is the word count command and the -l
+# modifies it to count the number of lines(instead of words)
+# in the echo command we use "$numLines" to call the variable numLines
+numLines=$(tail -n +2 Mariners_Batting_Data.csv | wc -l)
+echo "There is data on $numLines players in this file"
+echo
+
+# Asks the user if they would like to include the batting stats of the pitchers
+# read reads in the user's input
+echo "Would you like to include the batting statistics 
+of the pitchers in this summary? Type 'yes' or 'no'"
+read PitcherBool
+
+# now we will remove write different summaries (one with the pitchers, one without)
+# here is the format for a if, else if, else statement
+# if test *test*
+# then (if *test* is true)
+# command
+# elif test *anothertest*
+# then (if *test is false and *anothertest* is true)
+# command
+# else (neither test were true 
+# command
+
+if test "$PitcherBool" == "yes"
+then
+	echo "For team batting stats, what is the minumum number of at bats that a player has for him to be included?"
+	read minAB 
+	totalBA=$(cat Mariners_Batting_Data.csv | awk -v a="$minAB" -F "," '{ if ($7>=a) print;}' | awk -F ',' '{sum += $18} END {print sum}')
+	totalCounted=$(cat Mariners_Batting_Data.csv | awk -v a="$minAB" -F "," '{ if ($7>=a) print;}' | wc -l)
+	teamBA=$(bc <<< "scale = 3; $totalBA / ($totalCounted - 1)")
+	echo "The team BA (min AB: $minAB) is $teamBA"
+	echo
+	echo "Displaying the top hitters. Would you like to sort by HR, RBI, BA, OBP, SLG, OPS, or OPS+?"
+	read type
+	if test "$type" == "HR"
+	then
+		 echo "$(cat Mariners_Batting_data.csv | sort -k12 -n -r -t, | awk -F "," '{print $3, $12}' | head -10)"
+	elif test "$type" == "RBI"
+	then 
+		 echo "$(cat Mariners_Batting_data.csv | sort -k13 -n -r -t, | awk -F "," '{print $3, $13}' | head -10)"
+	elif test "$type" == "BA"
+	then 
+		 echo "$(cat Mariners_Batting_data.csv | sort -k18 -n -r -t, | awk -F "," '{print $3, $18}' | head -10)"
+	elif test "$type" == "OBP"
+	then
+		 echo "$(cat Mariners_Batting_data.csv | sort -k19 -n -r -t, | awk -F "," '{print $3, $19}' | head -10)"
+	elif test "$type" == "SLG"
+        then 
+                 echo "$(cat Mariners_Batting_data.csv | sort -k20 -n -r -t, | awk -F "," '{print $3, $20}' | head -10)"
+        elif test "$type" == "OPS"
+        then 
+                 echo "$(cat Mariners_Batting_data.csv | sort -k21 -n -r -t, | awk -F "," '{print $3, $21}' | head -10)"
+        elif test "$type" == "OPS+"
+        then
+                 echo "$(cat Mariners_Batting_data.csv | sort -k22 -n -r -t, | awk -F "," '{print $3, $22}' | head -10)"
+	else
+		echo "You must enter in one of the options given. Please restart the program"
+ fi
+
+	
+elif test "$PitcherBool" == "no"
+then
+	echo "For team batting stats, what is the minumum number of at bats that a player has for him to be included?"
+        read minAB
+        totalBA=$(cat Mariners_Batting_Data.csv | awk -v a="$minAB" -F "," '{ if (($7>=a)&&($2!="P")) print;}' | awk -F ',' '{sum += $18} END {print sum}')
+        totalCounted=$(cat Mariners_Batting_Data.csv | awk -v a="$minAB" -F "," '{ if (($7>=a)&&($2!="P")) print;}'|wc -l)
+	teamBA=$(bc <<< "scale = 3; $totalBA / ($totalCounted - 1)")
+        echo "The team BA (min AB: $minAB) is $teamBA"
+  echo
+        echo "Displaying the top hitters. Would you like to sort by HR, RBI, BA, OBP, SLG, OPS, or OPS+?"
+        read type
+        if test "$type" == "HR"
+        then
+                 echo "$(cat Mariners_Batting_data.csv |awk -F "," '{ if ($2!="P") print;}'| sort -k12 -n -r -t, | awk -F "," '{print $3, $12}' | head -10)"
+        elif test "$type" == "RBI"
+        then
+                 echo "$(cat Mariners_Batting_data.csv |awk -F "," '{ if ($2!="P") print;}'| sort -k13 -n -r -t, | awk -F "," '{print $3, $13}' | head -10)"
+        elif test "$type" == "BA"
+        then
+                 echo "$(cat Mariners_Batting_data.csv | awk -F "," '{ if ($2!="P") print;}'| sort -k18 -n -r -t, | awk -F "," '{print $3, $18}' | head -10)"
+        elif test "$type" == "OBP"
+        then
+                 echo "$(cat Mariners_Batting_data.csv | awk -F "," '{ if ($2!="P") print;}'| sort -k19 -n -r -t, | awk -F "," '{print $3, $19}' | head -10)"
+        elif test "$type" == "SLG"
+        then
+                 echo "$(cat Mariners_Batting_data.csv |awk -F "," '{ if ($2!="P") print;}'| sort -k20 -n -r -t, | awk -F "," '{print $3, $20}' | head -10)"
+        elif test "$type" == "OPS"
+        then
+                 echo "$(cat Mariners_Batting_data.csv | awk -F "," '{ if ($2!="P") print;}'| sort -k21 -n -r -t, | awk -F "," '{print $3, $21}' | head -10)"
+        elif test "$type" == "OPS+"
+        then
+                 echo "$(cat Mariners_Batting_data.csv | awk -F "," '{ if ($2!="P") print;}'| sort -k22 -n -r -t, | awk -F "," '{print $3, $22}' | head -10)"
+        else
+                echo "You must enter in one of the options given. Please restart the program"
+ fi
+
+else 
+	echo "response must be yes or no please restart program"
+fi
+
