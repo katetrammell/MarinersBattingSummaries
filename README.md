@@ -7,4 +7,4 @@ It asks for user input on various options (e.g. including pitchers, min AB, etc.
 
 
 To Run:
-Download the .ssh script and the .csv file into the same directory then type ./ in terminal
+Download the .ssh script and the .csv file into the same directory then type ./MsBattingSummary in terminal
